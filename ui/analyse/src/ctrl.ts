@@ -222,7 +222,22 @@ export default class AnalyseCtrl implements CevalHandler {
     }
     if (this.opts.chat && !this.isEmbed) {
       this.chatCtrl = new ChatCtrl(
-        { ...this.opts.chat, enhance: { plies: true, boards: !!this.study?.relay } },
+        {
+          ...this.opts.chat,
+          enhance: { plies: true, boards: !!this.study?.relay },
+          broadcastContext: this.study?.relay
+            ? () => {
+                const relay = this.study?.relay;
+                const chapter = this.study?.data.chapter;
+                if (!relay || !chapter) return;
+                return {
+                  roundId: relay.round.id,
+                  gameId: chapter.id,
+                  ply: this.node.ply,
+                };
+              }
+            : undefined,
+        },
         this.redraw,
       );
     }

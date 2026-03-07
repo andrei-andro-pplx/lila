@@ -1,4 +1,4 @@
-import type { Line } from '@/chat/interfaces';
+import type { Line, BroadcastContext } from '@/chat/interfaces';
 import type { Data as WatchersData } from '@/view/watchers';
 
 import type { TreePath } from './tree/types';
@@ -13,6 +13,7 @@ export interface PubsubEvents {
   'analysis.comp.toggle': (enabled: boolean) => void;
   'analysis.server.progress': (analyseData: any) => void;
   'board.change': (is3d: boolean) => void;
+  'broadcast.navigate': (ctx: BroadcastContext) => void;
   'challenge-app.open': () => void;
   'chart.panning': () => void;
   'chat.permissions': (perms: { local: boolean }) => void;

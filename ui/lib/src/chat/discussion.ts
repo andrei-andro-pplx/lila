@@ -9,13 +9,24 @@ import { tempStorage } from '../storage';
 import { alert } from '../view/dialogs';
 import { userLink } from '../view/userLink';
 import type { ChatCtrl } from './chatCtrl';
-import type { Line } from './interfaces';
+import type { Line, BroadcastContext } from './interfaces';
 import { lineAction as modLineAction, flagReport } from './moderation';
 import { presetView } from './preset';
 import * as spam from './spam';
 
 const whisperRegex = /^\/[wW](?:hisper)?\s/;
 const scrollState = { pinToBottom: true, lastScrollTop: 0 };
+const sentinelRegex = /\x01([^/\x01]+)\/([^/\x01]+)\/(\d+)\x01$/;
+
+export function parseBroadcastContext(text: string): BroadcastContext | undefined {
+  const m = text.match(sentinelRegex);
+  if (!m) return undefined;
+  const ply = parseInt(m[3]);
+  if (isNaN(ply) || ply < 0) return undefined;
+  return { roundId: m[1], gameId: m[2], ply };
+}
+
+export const stripSentinel = (text: string): string => text.replace(sentinelRegex, '');
 
 export default function (ctrl: ChatCtrl): Array<VNode | undefined> {
   if (!ctrl.chatEnabled()) return [];
@@ -31,6 +42,13 @@ export default function (ctrl: ChatCtrl): Array<VNode | undefined> {
             const $el = $(el).on('click', 'a.jump', (e: Event) => {
               const ply = (e.target as HTMLElement).getAttribute('data-ply');
               if (ply) pubsub.emit('jump', ply);
+            });
+            $el.on('click', 'li.broadcast-nav', (e: Event) => {
+              const li = (e.target as HTMLElement).closest('li.broadcast-nav') as HTMLElement | null;
+              if (!li) return;
+              const { roundId, gameId, ply } = li.dataset;
+              if (roundId && gameId && ply)
+                pubsub.emit('broadcast.navigate', { roundId, gameId, ply: parseInt(ply) });
             });
             $el.on('click', '.reply', (e: Event) => {
               const el = e.target as HTMLElement;
@@ -234,7 +252,7 @@ const profileLinkRegex = /(https:\/\/)?lichess\.org\/@\/([a-zA-Z0-9_-]+)/g;
 const processProfileLink = (text: string) => text.replace(profileLinkRegex, '@$2');
 
 function renderText(t: string, opts?: enhance.EnhanceOpts) {
-  const processedText = processProfileLink(t);
+  const processedText = processProfileLink(stripSentinel(t));
   if (enhance.isMoreThanText(processedText)) {
     const hook = updateText(opts);
     return h('t', { lichessChat: processedText, hook: { create: hook, update: hook } });
@@ -281,6 +299,9 @@ function renderLine(ctrl: ChatCtrl, line: Line): VNode {
       .match(enhance.userPattern)
       ?.find(mention => mention.trim().toLowerCase() === `@${ctrl.data.userId}`);
 
+  const broadcastCtx = parseBroadcastContext(line.t);
+  const hasBroadcastNav = !!broadcastCtx && !!ctrl.opts.broadcastContext;
+
   return h(
     'li',
     {
@@ -288,7 +309,15 @@ function renderLine(ctrl: ChatCtrl, line: Line): VNode {
         me: userId === myUserId,
         host: !!(userId && ctrl.data.hostIds?.includes(userId)),
         mentioned,
+        'broadcast-nav': hasBroadcastNav,
       },
+      attrs: hasBroadcastNav
+        ? {
+            'data-round-id': broadcastCtx!.roundId,
+            'data-game-id': broadcastCtx!.gameId,
+            'data-ply': broadcastCtx!.ply,
+          }
+        : {},
     },
     [...actionIcons(ctrl, line), userNode, ' ', textNode],
   );

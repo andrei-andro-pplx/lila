@@ -49,7 +49,22 @@ export default class RelayCtrl {
       const showLiveboard = () => this.tourShow() || !study.multiBoard.showResults();
       this.liveboardPlugin = new LiveboardPlugin(study.ctrl, showLiveboard, study.chapterSelect.get());
       study.ctrl.opts.chat.plugin = this.liveboardPlugin;
+      study.ctrl.opts.chat.broadcastContext = () => ({
+        roundId: this.round.id,
+        gameId: study.chapterSelect.get(),
+        ply: study.ctrl.node.ply,
+      });
     }
+
+    pubsub.on('broadcast.navigate', async ctx => {
+      if (ctx.roundId !== this.round.id) return;
+      if (study.chapterSelect.is(ctx.gameId)) {
+        await study.chapterSelect.set(ctx.gameId);
+        const path = study.ctrl.mainlinePlyToPath(ctx.ply);
+        study.ctrl.userJump(path);
+        this.redraw();
+      }
+    });
 
     const locationTab = location.hash.replace(/^#([\w-]+).*$/, '$1') as RelayTab;
     const initialTab = relayTabs.includes(locationTab)

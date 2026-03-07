@@ -4,6 +4,12 @@ import type { Prop } from '@/index';
 import type { EnhanceOpts } from '@/richText';
 export type { ChatCtrl } from './chatCtrl';
 
+export interface BroadcastContext {
+  roundId: string;
+  gameId: string;
+  ply: number;
+}
+
 export interface ChatOpts {
   data: ChatData;
   writeable: boolean;
@@ -19,6 +25,7 @@ export interface ChatOpts {
   noteText?: string;
   plugin?: ChatPlugin;
   kidMode: boolean;
+  broadcastContext?: () => BroadcastContext | undefined;
 }
 
 export type Tab = { key: string; isDisabled?: () => boolean };

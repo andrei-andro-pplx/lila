@@ -17,8 +17,15 @@ export interface ChatOpts {
   preset?: string;
   noteId?: string;
   noteText?: string;
+  onMessageSubmit?: () => MessageSubmitData | undefined;
   plugin?: ChatPlugin;
   kidMode: boolean;
+}
+
+export interface MessageSubmitData {
+  roundId: string;
+  gameId: string;
+  ply: Ply;
 }
 
 export type Tab = { key: string; isDisabled?: () => boolean };

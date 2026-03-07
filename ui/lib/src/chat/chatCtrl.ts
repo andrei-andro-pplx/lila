@@ -5,6 +5,7 @@ import { prop, type Prop } from '../index';
 import { pubsub, type PubsubEvents } from '../pubsub';
 import { storedStringProp, storedBooleanProp } from '../storage';
 import { alert } from '../view/dialogs';
+import { attachRelayChatData } from './relayData';
 import type {
   ChatOpts,
   Line,
@@ -117,12 +118,19 @@ export class ChatCtrl {
     text = text.trim();
     if (!text) return false;
     if (text === 'You too!' && !this.data.lines.some(l => l.u !== this.data.userId)) return false;
-    if (text.length > 140) {
+    const finalText = this.makePostText(text);
+    if (finalText.length > 140) {
       alert('Max length: 140 chars. ' + text.length + ' chars used.');
       return false;
     }
-    pubsub.emit('socket.send', 'talk', text);
+    pubsub.emit('socket.send', 'talk', finalText);
     return true;
+  };
+
+  private makePostText = (text: string): string => {
+    const withRelayData = attachRelayChatData(text, this.opts.onMessageSubmit?.());
+    if (withRelayData.length <= 140) return withRelayData;
+    return text;
   };
 
   listenToIncoming = (cb: (line: Line) => void): void => pubsub.on('socket.in.message', cb);

@@ -26,6 +26,14 @@ body {
 }
 
 main.is-relay {
+  .mchat__messages li.relay-nav {
+    cursor: pointer;
+
+    &:hover t {
+      text-decoration: underline;
+    }
+  }
+
   .relay-tour {
     grid-area: relay-tour;
 

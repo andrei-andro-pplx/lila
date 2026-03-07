@@ -34,6 +34,7 @@ import { gamesList } from './relayGames';
 import { playersView } from './relayPlayers';
 import { statsView } from './relayStats';
 import { teamsView } from './relayTeams';
+import { relayChatMessageListener } from './chatNavigation';
 
 export function renderRelayTour(ctx: RelayViewContext): VNode | undefined {
   const tab = ctx.relay.tab();
@@ -111,7 +112,7 @@ export const tourSide = (ctx: RelayViewContext, kid: LooseVNode) => {
           max: () => 50 * study.chapters.list.size(),
           initialMaxHeight: () => window.innerHeight / 2,
         }),
-      ctx.ctrl.chatCtrl && renderChat(ctx.ctrl.chatCtrl),
+      ctx.ctrl.chatCtrl && renderChat(ctx.ctrl.chatCtrl, { insert: relayChatMessageListener(relay, study) }),
       resizeId &&
         verticalResize({
           key: 'relay-chat',

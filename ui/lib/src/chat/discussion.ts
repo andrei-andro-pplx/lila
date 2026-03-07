@@ -12,6 +12,7 @@ import type { ChatCtrl } from './chatCtrl';
 import type { Line } from './interfaces';
 import { lineAction as modLineAction, flagReport } from './moderation';
 import { presetView } from './preset';
+import { parseRelayChatData, stripRelayChatData } from './relayData';
 import * as spam from './spam';
 
 const whisperRegex = /^\/[wW](?:hisper)?\s/;
@@ -265,7 +266,9 @@ const actionIcons = (ctrl: ChatCtrl, line: Line): Array<VNode | null> => {
 };
 
 function renderLine(ctrl: ChatCtrl, line: Line): VNode {
-  const textNode = renderText(line.t, ctrl.opts.enhance);
+  const relayData = parseRelayChatData(line.t);
+  const displayText = relayData ? stripRelayChatData(line.t) : line.t;
+  const textNode = renderText(displayText, ctrl.opts.enhance);
 
   if (line.u === 'lichess') return h('li.system', textNode);
 
@@ -288,7 +291,15 @@ function renderLine(ctrl: ChatCtrl, line: Line): VNode {
         me: userId === myUserId,
         host: !!(userId && ctrl.data.hostIds?.includes(userId)),
         mentioned,
+        'relay-nav': !!relayData,
       },
+      attrs: relayData
+        ? {
+            'data-relay-round-id': relayData.roundId,
+            'data-relay-game-id': relayData.gameId,
+            'data-relay-ply': relayData.ply,
+          }
+        : undefined,
     },
     [...actionIcons(ctrl, line), userNode, ' ', textNode],
   );

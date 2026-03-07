@@ -121,7 +121,9 @@ export class ChatCtrl {
       alert('Max length: 140 chars. ' + text.length + ' chars used.');
       return false;
     }
-    pubsub.emit('socket.send', 'talk', text);
+    const ctx = this.opts.broadcastContext?.();
+    const msg = ctx ? `${text}\x01${ctx.roundId}/${ctx.gameId}/${ctx.ply}\x01` : text;
+    pubsub.emit('socket.send', 'talk', msg);
     return true;
   };
 

@@ -1,0 +1,36 @@
+.chat-liveboard-wrap {
+  @extend %flex-column;
+
+  gap: 0.5em;
+}
+
+.chat-liveboard-controls {
+  @extend %flex-center;
+
+  justify-content: flex-end;
+  padding: 0.3em 0.5em;
+
+  .cmn-toggle-wrap {
+    font-size: 0.85em;
+    gap: 0;
+  }
+
+  .cmn-toggle {
+    transform: scale(0.7);
+  }
+}
+
+.chat-liveboard-board {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .chat-liveboard {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .mini-game__gauge {
+    flex: 0 0 25px;
+    max-width: 25px;
+  }
+}

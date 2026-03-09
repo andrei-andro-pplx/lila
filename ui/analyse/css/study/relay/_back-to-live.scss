@@ -11,20 +11,3 @@
     display: none;
   }
 }
-
-.chat-liveboard {
-  display: flex;
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-}
-
-.mchat:has(.chat-liveboard) {
-  box-shadow: none;
-}
-
-.mchat .liveboard {
-  cg-board {
-    border-top-right-radius: 0;
-  }
-}

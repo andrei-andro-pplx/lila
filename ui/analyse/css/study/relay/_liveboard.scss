@@ -18,12 +18,12 @@
   &__board-wrap {
     display: flex;
     width: 100%;
-    aspect-ratio: 1;
   }
 
   &__board {
     flex: 1;
     min-width: 0;
+    aspect-ratio: 1;
   }
 
   .mini-game__gauge {

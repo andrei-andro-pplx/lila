@@ -1,0 +1,34 @@
+.chat-liveboard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .cmn-toggle-wrap {
+    font-size: 0.85em;
+    padding: 0.3em 0.5em;
+    gap: 0;
+
+    .cmn-toggle {
+      transform: scale(0.7);
+    }
+  }
+
+  &__board-wrap {
+    display: flex;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  &__board {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .mini-game__gauge {
+    flex: 0 0 25px;
+    max-width: 25px;
+    order: 1;
+    margin-left: 4px;
+  }
+}

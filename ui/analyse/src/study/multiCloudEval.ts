@@ -16,6 +16,7 @@ export type GetCloudEval = (fen: FEN) => CloudEval | undefined;
 export class MultiCloudEval {
   showEval: Prop<boolean>;
 
+  private extraShowEvalSources: (() => boolean)[] = [];
   private observed: Set<HTMLElement> = new Set();
   private observer: IntersectionObserver | undefined =
     window.IntersectionObserver &&
@@ -49,6 +50,10 @@ export class MultiCloudEval {
 
   thisIfShowEval = (): MultiCloudEval | undefined => (this.showEval() ? this : undefined);
 
+  addShowEvalSource = (source: () => boolean) => this.extraShowEvalSources.push(source);
+
+  anyShowEval = (): boolean => this.showEval() || this.extraShowEvalSources.some(s => s());
+
   observe = (el: HTMLElement) => this.observer?.observe(el);
 
   private observedIds = () => new Set(Array.from(this.observed).map(el => el.dataset.id));
@@ -56,7 +61,7 @@ export class MultiCloudEval {
   private lastRequestedFens: Set<FEN> = new Set();
 
   private sendRequestNow = () => {
-    if (!this.showEval() || document.visibilityState === 'hidden') return;
+    if (!this.anyShowEval() || document.visibilityState === 'hidden') return;
     const ids = this.observedIds();
     const chapters = this.chapters
       .all()
@@ -77,7 +82,7 @@ export class MultiCloudEval {
     }
   };
 
-  private requestNewEvals = debounce(this.sendRequestNow, 2000);
+  requestNewEvals = debounce(this.sendRequestNow, 2000);
 
   onCloudEval = (d: EvalHitMulti) => {
     this.cloudEvals.set(d.fen, { ...d, chances: povChances('white', d) });
